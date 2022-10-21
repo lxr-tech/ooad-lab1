@@ -12,7 +12,7 @@ class AddInterface(object):
         parser.add_argument("-add", help="add sth.")
         parser.add_argument("-at", help="at sp.")
         args = parser.parse_args()
-        print(f"this is an add_title function, info: {{add: {args.add_title}, at: {args.at}, }}")
+        print(f"this is an add_title function, info: {{add: {args.add}, at: {args.at}, }}")
 
 
 class DeleteInterface(object):
