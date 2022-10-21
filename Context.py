@@ -94,12 +94,9 @@ class ListContext(Context):  # 无法去除内部没有.bmk的文件夹
         pass
 
     def strategyMethod(self, **kwargs):
-        self.visitAndList(os.getcwd())
-
-    def visitAndList(self, path: str):
+        path = os.getcwd()
         contentProvider = FSContentProvider(root=FileWithPath(path=path))
-        nameProvider = FSNameProvider()
-        treeView = TreeView(contentProvider=contentProvider, nameProvider=nameProvider)
+        treeView = TreeView(contentProvider=contentProvider)
         treeView.show(path=path, suffix='.bmk')
 
 
@@ -109,9 +106,7 @@ class ReadContext(Context):
         pass
 
     def strategyMethod(self, **kwargs):
-        self.visitAndRead(bookmark=kwargs['bookmark'])
-
-    def visitAndRead(self, bookmark: str):
+        bookmark = kwargs['bookmark']
         singleton = Singleton.getInstance()
         for component in singleton.getAllComponents():
             if component.name == bookmark:
@@ -124,18 +119,15 @@ class AddContext(Context):
         pass
 
     def strategyMethod(self, **kwargs):
+        singleton = Singleton.getInstance()
         if 'title' in kwargs:
             component = Title(name=kwargs['title'], parent=kwargs['parent'])
-            self.visitAndAdd(component)
+            singleton.addComponent(component=component)
         elif 'bookmark' in kwargs:
             bookmark = kwargs['bookmark'].split('@')
             assert len(bookmark) == 2
             component = Bookmark(name=bookmark[0], url=bookmark[1], parent=kwargs['parent'])
-            self.visitAndAdd(component)
-
-    def visitAndAdd(self, component):
-        singleton = Singleton.getInstance()
-        singleton.addComponent(component=component)
+            singleton.addComponent(component=component)
 
 
 class DeleteContext(Context):

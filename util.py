@@ -43,12 +43,6 @@ class FileWithPath:
                 if name.endswith(suffix) or FileWithPath(self.getPath() + '/' + name).isDirectory()]
 
 
-class FSNameProvider:
-
-    def getName(self, fileWithPath: FileWithPath) -> str:
-        return fileWithPath.getName()
-
-
 class FSContentProvider:
     def __init__(self, root: FileWithPath):
         self.root = root
@@ -61,19 +55,18 @@ class FSContentProvider:
 
 
 class TreeView(object):
-    def __init__(self, contentProvider: FSContentProvider, nameProvider: FSNameProvider):
+    def __init__(self, contentProvider: FSContentProvider):
         self.contentProvider = contentProvider
-        self.nameProvider = nameProvider
         self.space = ''
         self.list = []
 
     def visitLeaf(self, leaf, isLast):
         prefix = str(self.space) + '└── ' if isLast else str(self.space) + '├── '
-        self.list.append(prefix + self.nameProvider.getName(leaf) + "\n")
+        self.list.append(prefix + leaf.getName() + "\n")
 
     def visitComponent(self, component, isLast):
         prefix = str(self.space) + '└── ' if isLast else str(self.space) + '├── '
-        self.list.append(prefix + self.nameProvider.getName(component) + "\n")
+        self.list.append(prefix + component.getName() + "\n")
         self.space = str(self.space) + '    ' if isLast else str(self.space) + '│   '
 
     def visitAndShow(self, path: str, suffix: str):
@@ -85,7 +78,7 @@ class TreeView(object):
                 self.visitLeaf(file, num == total-1)
             elif file.isDirectory():
                 self.visitComponent(file, num == total-1)
-                self.visitAndShow(fileWithPath.getPath() + '/' + self.nameProvider.getName(file), suffix=suffix)
+                self.visitAndShow(fileWithPath.getPath() + '/' + file.getName(), suffix=suffix)
                 self.space = self.space[:-4]
         return self.list
 
@@ -97,7 +90,6 @@ class TreeView(object):
 if __name__ == '__main__':
     path = 'd:/pycharmProjects/ooad-lab1'  # 'D:/研究/论文'
     fsContentProvider = FSContentProvider(root=FileWithPath(path=path))
-    fsNameProvider = FSNameProvider()
-    d = TreeView(contentProvider=fsContentProvider, nameProvider=fsNameProvider)
+    d = TreeView(contentProvider=fsContentProvider)
     d.show(path=path, suffix='.py')
 
