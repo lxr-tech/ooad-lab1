@@ -95,7 +95,7 @@ class ListContext(Context):  # 无法去除内部没有.bmk的文件夹
 
     def strategyMethod(self, **kwargs):
         path = os.getcwd()
-        contentProvider = FSContentProvider(root=FileWithPath(path=path))
+        contentProvider = ContentProvider(root=AbstractFile(path=path))
         treeView = TreeView(contentProvider=contentProvider)
         treeView.show(path=path, suffix='.bmk')
 

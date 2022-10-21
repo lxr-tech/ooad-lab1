@@ -22,74 +22,102 @@ def every(lst, fn=lambda x: x):
     return all(map(fn, lst))
 
 
-class FileWithPath:
-    def __init__(self, path: str):
-        self.path = path
+class AbstractFile:
 
-    def getPath(self) -> str:
-        return self.path
-
-    def getName(self) -> str:
-        return self.getPath().split('/')[-1]
-
-    def isFile(self) -> bool:
-        return os.path.isfile(self.getPath())
-
-    def isDirectory(self) -> bool:
-        return os.path.isdir(self.getPath())
-
-    def getAllFiles(self, suffix: str):
-        return [FileWithPath(self.getPath() + '/' + name) for name in os.listdir(self.getPath())
-                if name.endswith(suffix) or FileWithPath(self.getPath() + '/' + name).isDirectory()]
-
-
-class FSContentProvider:
-    def __init__(self, root: FileWithPath):
+    def __init__(self, name: str, root: str):
+        self.name = name
         self.root = root
 
-    def getRoots(self, suffix: str) -> List[FileWithPath]:
-        return self.root.getAllFiles(suffix)
+    def getRoot(self) -> str:
+        pass
+
+    def getName(self) -> str:
+        pass
+
+    def getFullName(self) -> str:
+        pass
+
+    def isFile(self) -> bool:
+        pass
+
+    def isDirectory(self) -> bool:
+        pass
+
+    def getSiblings(self) -> List:
+        pass
+
+
+class FileWithPath(AbstractFile):
+    def __init__(self, name: str, root: str):
+        super().__init__(name=name, root=root)
+        # self.name = name
+        # self.root = root
+
+    def getRoot(self) -> str:
+        return self.root
+
+    def getName(self) -> str:
+        return self.name
+
+    def getFullName(self) -> str:
+        return self.getRoot() + '/' + self.getName()
+
+    def isFile(self) -> bool:
+        return os.path.isfile(self.getFullName())
+
+    def isDirectory(self) -> bool:
+        return os.path.isdir(self.getFullName())
+
+    def getSiblings(self) -> List:
+        return os.listdir(self.getFullName())
+
+
+class ContentProvider:
+
+    def getAllFiles(self, suffix: str, parent: FileWithPath) -> List[FileWithPath]:
+        return [FileWithPath(root=parent.getFullName(), name=name) for name in parent.getSiblings()
+                if name.endswith(suffix) or FileWithPath(root=parent.getFullName(), name=name).isDirectory()]
 
     def getChildren(self, suffix: str, parent: FileWithPath) -> List[FileWithPath]:
-        return parent.getAllFiles(suffix) if parent.isDirectory() else []
+        return self.getAllFiles(suffix, parent) if parent.isDirectory() else []
 
 
 class TreeView(object):
-    def __init__(self, contentProvider: FSContentProvider):
-        self.contentProvider = contentProvider
+    def __init__(self):
+        self.contentProvider = ContentProvider()
         self.space = ''
         self.list = []
 
-    def visitLeaf(self, leaf, isLast):
+    def visitFile(self, leaf, isLast):
         prefix = str(self.space) + '└── ' if isLast else str(self.space) + '├── '
-        self.list.append(prefix + leaf.getName() + "\n")
+        return prefix + leaf.getName() + "\n"
 
-    def visitComponent(self, component, isLast):
+    def visitDirectory(self, component, isLast):
         prefix = str(self.space) + '└── ' if isLast else str(self.space) + '├── '
-        self.list.append(prefix + component.getName() + "\n")
         self.space = str(self.space) + '    ' if isLast else str(self.space) + '│   '
+        return prefix + component.getName() + "\n"
 
-    def visitAndShow(self, path: str, suffix: str):
-        fileWithPath = FileWithPath(path=path)
+    def visitAndShow(self, root: str, name: str, suffix: str):
+        fileWithPath = FileWithPath(root=root, name=name)
         files = self.contentProvider.getChildren(parent=fileWithPath, suffix=suffix)
         total = len(files)
         for num, file in enumerate(files):
             if file.isFile():
-                self.visitLeaf(file, num == total-1)
+                self.list.append(self.visitFile(file, num == total - 1))
             elif file.isDirectory():
-                self.visitComponent(file, num == total-1)
-                self.visitAndShow(fileWithPath.getPath() + '/' + file.getName(), suffix=suffix)
+                self.list.append(self.visitDirectory(file, num == total - 1))
+                self.visitAndShow(root=fileWithPath.getFullName(), name=file.getName(), suffix=suffix)
                 self.space = self.space[:-4]
-        return self.list
 
     def show(self, path: str, suffix: str):
-        self.visitAndShow(path=path, suffix=suffix)
+        name = path.split('/')[-1]
+        root = '/'.join(path.split('/')[:-1])
+        self.visitAndShow(root=root, name=name, suffix=suffix)
         print(''.join(self.list))
 
 
 if __name__ == '__main__':
     path = 'd:/pycharmProjects/ooad-lab1'  # 'D:/研究/论文'
-    fsContentProvider = FSContentProvider(root=FileWithPath(path=path))
-    d = TreeView(contentProvider=fsContentProvider)
+    d = TreeView()
     d.show(path=path, suffix='.py')
 
