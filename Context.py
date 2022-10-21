@@ -1,20 +1,19 @@
-from Visitor import *
+from Component import *
 
 import re, os
 from util import *
 
 
-class Decorator(Visitor):
+class Context:
     def __init__(self):
         super().__init__()
-        self.visitor = Visitor()
         pass
 
-    def visit(self, component: Component, **kwargs):
+    def strategyMethod(self, **kwargs):
         pass
 
 
-class OpenDecorator(Decorator):
+class OpenContext(Context):
     def __init__(self):
         super().__init__()
         pass
@@ -37,7 +36,7 @@ class OpenDecorator(Decorator):
             singleton = Singleton.getInstance()
             singleton.addComponent(bookmark)
 
-    def visit(self, component: Component, **kwargs):
+    def strategyMethod(self, **kwargs):
         singleton = Singleton.getInstance()
         singleton.reset()
         self.visitAndOpen(kwargs['raw_dict'], parent=None)
@@ -49,13 +48,13 @@ class OpenDecorator(Decorator):
             self.openTitle(component, parent=parent)
 
 
-class ShowDecorator(Decorator):
+class ShowContext(Context):
     def __init__(self):
         super().__init__()
         self.space = ''
         self.list = []
 
-    def visit(self, component: Component, **kwargs):
+    def strategyMethod(self, **kwargs):
         singleton = Singleton.getInstance()
         total = len(singleton.getRoots())
         print(len(singleton.components))
@@ -63,7 +62,7 @@ class ShowDecorator(Decorator):
             self.visitTitle(component, num == total-1)
             self.visitAndShow(component)
             self.space = self.space[:-4]
-        print(''.join(self.list), end='')
+        return self.list
 
     def visitAndShow(self, component: Component):
         singleton = Singleton.getInstance()
@@ -89,12 +88,12 @@ class ShowDecorator(Decorator):
         self.space = str(self.space) + '    ' if isLast else str(self.space) + '│   '
 
 
-class ListDecorator(Decorator):  # 无法去除内部没有.bmk的文件夹
+class ListContext(Context):  # 无法去除内部没有.bmk的文件夹
     def __init__(self):
         super().__init__()
         pass
 
-    def visit(self, component: Component, **kwargs):
+    def strategyMethod(self, **kwargs):
         self.visitAndList(os.getcwd())
 
     def visitAndList(self, path: str):
@@ -104,12 +103,12 @@ class ListDecorator(Decorator):  # 无法去除内部没有.bmk的文件夹
         treeView.show(path=path, suffix='.bmk')
 
 
-class ReadDecorator(Decorator):
+class ReadContext(Context):
     def __init__(self):
         super().__init__()
         pass
 
-    def visit(self, component: Component, **kwargs):
+    def strategyMethod(self, **kwargs):
         self.visitAndRead(bookmark=kwargs['bookmark'])
 
     def visitAndRead(self, bookmark: str):
@@ -119,12 +118,12 @@ class ReadDecorator(Decorator):
                 component.addReadNum()
 
 
-class AddDecorator(Decorator):
+class AddContext(Context):
     def __init__(self):
         super().__init__()
         pass
 
-    def visit(self, component: Component, **kwargs):
+    def strategyMethod(self, **kwargs):
         if 'title' in kwargs:
             component = Title(name=kwargs['title'], parent=kwargs['parent'])
             self.visitAndAdd(component)
@@ -139,122 +138,19 @@ class AddDecorator(Decorator):
         singleton.addComponent(component=component)
 
 
-class DeleteDecorator(Decorator):
+class DeleteContext(Context):
     def __init__(self):
         super().__init__()
         pass
 
-    def visit(self, component: Component, **kwargs):
+    def strategyMethod(self, **kwargs):
         singleton = Singleton.getInstance()
         children = singleton.getChildren(parentName=kwargs['name'])
         for child in children:
-            self.visit(component=component, name=child.getName())
+            self.strategyMethod(name=child.getName())
         self.visitAndDelete(name=kwargs['name'])
 
     def visitAndDelete(self, name):
         singleton = Singleton.getInstance()
         singleton.deleteComponent(name=name)
 
-
-# class OpenTitle(OpenDecorator):
-#     def __init__(self):
-#         super().__init__()
-#         pass
-#
-#     def visit(self, component: Title, **kwargs):
-#         raw_dict = kwargs['raw_dict']
-#         print('open title', raw_dict)
-#         process(component=raw_dict, parent=component)
-#
-#
-# class ShowBookmark(ShowDecorator):
-#     def __init__(self):
-#         super().__init__()
-#         pass
-#
-#     def visit(self, component: Bookmark, **kwargs):
-#         singleton = Singleton.getInstance()
-#         current, depth = singleton.getCurrent()
-#         print(' ' * depth, component.name, component.url)
-#
-#     def show(self, component: Bookmark):
-#         pass
-#
-#
-# class ShowTitle(ShowDecorator):
-#     def __init__(self):
-#         super().__init__()
-#         pass
-#
-#     def visit(self, component: Title, **kwargs):
-#         singleton = Singleton.getInstance()
-#         current, depth = singleton.getCurrent()
-#         print(''.join([' '] * depth), component.name)
-#         for child in component.getChildren():
-#             singleton.setCurrent(current=child, depth=depth+1)
-#             Visitor().visit(component=child)
-#         singleton.setCurrent(current=component, depth=depth)
-#
-#     def show(self, component: Title):
-#         pass
-#
-#
-# class AddBookmark(Visitor):
-#     def __init__(self):
-#         super().__init__()
-#         pass
-#
-#     def visit(self, component: Component, **kwargs):
-#         pass
-#
-#     def add(self, component: Component):
-#         pass
-#
-#
-# class AddTitle(Visitor):
-#     def __init__(self):
-#         super().__init__()
-#         pass
-#
-#     def visit(self, component: Component, **kwargs):
-#         pass
-#
-#     def add(self, component: Component):
-#         pass
-#
-#
-# class DeleteBookmark(Visitor):
-#     def __init__(self):
-#         super().__init__()
-#         pass
-#
-#     def visit(self, component: Component, **kwargs):
-#         pass
-#
-#     def delete(self, component: Component):
-#         pass
-#
-#
-# class DeleteTitle(Visitor):
-#     def __init__(self):
-#         super().__init__()
-#         pass
-#
-#     def visit(self, component: Component, **kwargs):
-#         pass
-#
-#     def delete(self, component: Component):
-#         pass
-#
-#
-# class ReadBookmark(Visitor):
-#     def __init__(self):
-#         super().__init__()
-#         pass
-#
-#     def visit(self, component: Component, **kwargs):
-#         pass
-#
-#     def read(self, component: Component):
-#         pass
-#

@@ -1,14 +1,8 @@
-from __future__ import annotations
-from abc import ABC, abstractmethod
 
-
-class Component():
+class Component:
     def __init__(self, name=None, parent=None):
         self.name = name
         self.parent = parent
-
-    def accept(self, visitor):
-        visitor.visit(self)
 
     def getName(self):
         return self.name
@@ -17,20 +11,9 @@ class Component():
         return self.parent
 
 
-class Visitor:
-    def __init__(self):
-        pass
-
-    def visit(self, component: Component):
-        component.accept(self)
-
-
 class Title(Component):
     def __init__(self, name, parent):
         super().__init__(name=name, parent=parent)
-
-    def accept(self, visitor: Visitor):
-        visitor.visit(self)
 
     def getName(self):
         return self.name
@@ -44,9 +27,6 @@ class Bookmark(Component):
         super().__init__(name=name, parent=parent)
         self.readNum = 0
         self.url = url
-
-    def accept(self, visitor: []):
-        visitor.visit(self)
 
     def getName(self):
         return self.name

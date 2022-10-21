@@ -1,15 +1,12 @@
-from Decorator import *
+from Context import *
 
 
 class AbstractFactory:
     def __init__(self):
         pass
 
-    def newBookmarkVisitor(self) -> Visitor:
-        return Visitor()
-
-    def newTitleVisitor(self) -> Visitor:
-        return Visitor()
+    def newContext(self) -> Context:
+        return Context()
 
 
 class OpenFactory(AbstractFactory):
@@ -17,8 +14,8 @@ class OpenFactory(AbstractFactory):
         super().__init__()
         pass
 
-    def newTitleVisitor(self) -> OpenDecorator:
-        return OpenDecorator()
+    def newContext(self) -> OpenContext:
+        return OpenContext()
 
 
 class ShowFactory(AbstractFactory):
@@ -26,8 +23,8 @@ class ShowFactory(AbstractFactory):
         super().__init__()
         pass
 
-    def newTitleVisitor(self) -> ShowDecorator:
-        return ShowDecorator()
+    def newContext(self) -> ShowContext:
+        return ShowContext()
 
 
 class ListFactory(AbstractFactory):
@@ -35,8 +32,8 @@ class ListFactory(AbstractFactory):
         super().__init__()
         pass
 
-    def newTitleVisitor(self) -> ListDecorator:
-        return ListDecorator()
+    def newContext(self) -> ListContext:
+        return ListContext()
 
 
 class ReadFactory(AbstractFactory):
@@ -44,8 +41,8 @@ class ReadFactory(AbstractFactory):
         super().__init__()
         pass
 
-    def newBookmarkVisitor(self) -> ReadDecorator:
-        return ReadDecorator()
+    def newContext(self) -> ReadContext:
+        return ReadContext()
 
 
 class AddFactory(AbstractFactory):
@@ -53,8 +50,8 @@ class AddFactory(AbstractFactory):
         super().__init__()
         pass
 
-    def newTitleVisitor(self) -> AddDecorator:
-        return AddDecorator()
+    def newContext(self) -> AddContext:
+        return AddContext()
 
 
 class DeleteFactory(AbstractFactory):
@@ -62,6 +59,6 @@ class DeleteFactory(AbstractFactory):
         super().__init__()
         pass
 
-    def newTitleVisitor(self) -> DeleteDecorator:
-        return DeleteDecorator()
+    def newContext(self) -> DeleteContext:
+        return DeleteContext()
 

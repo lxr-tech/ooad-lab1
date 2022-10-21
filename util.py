@@ -67,32 +67,30 @@ class TreeView(object):
         self.space = ''
         self.list = []
 
-    def getDirList(self, path: str, suffix: str):
+    def visitLeaf(self, leaf, isLast):
+        prefix = str(self.space) + '└── ' if isLast else str(self.space) + '├── '
+        self.list.append(prefix + self.nameProvider.getName(leaf) + "\n")
+
+    def visitComponent(self, component, isLast):
+        prefix = str(self.space) + '└── ' if isLast else str(self.space) + '├── '
+        self.list.append(prefix + self.nameProvider.getName(component) + "\n")
+        self.space = str(self.space) + '    ' if isLast else str(self.space) + '│   '
+
+    def visitAndShow(self, path: str, suffix: str):
         fileWithPath = FileWithPath(path=path)
         files = self.contentProvider.getChildren(parent=fileWithPath, suffix=suffix)
-        fileNum = len(files)
-        tmpNum = 0
-        for file in files:
+        total = len(files)
+        for num, file in enumerate(files):
             if file.isFile():
-                tmpNum = tmpNum + 1
-                if tmpNum != fileNum:
-                    self.list.append(str(self.space) + '├── ' + self.nameProvider.getName(file) + "\n")
-                else:
-                    self.list.append(str(self.space) + '└── ' + self.nameProvider.getName(file) + "\n")
+                self.visitLeaf(file, num == total-1)
             elif file.isDirectory():
-                tmpNum = tmpNum + 1
-                if tmpNum != fileNum:
-                    self.list.append(str(self.space) + '├── ' + self.nameProvider.getName(file) + "\n")
-                    self.space = self.space + '│   '
-                else:
-                    self.list.append(str(self.space) + '└── ' + self.nameProvider.getName(file) + "\n")
-                    self.space = self.space + '    '
-                self.getDirList(fileWithPath.getPath() + '/' + self.nameProvider.getName(file), suffix=suffix)
+                self.visitComponent(file, num == total-1)
+                self.visitAndShow(fileWithPath.getPath() + '/' + self.nameProvider.getName(file), suffix=suffix)
                 self.space = self.space[:-4]
         return self.list
 
     def show(self, path: str, suffix: str):
-        self.getDirList(path=path, suffix=suffix)
+        self.visitAndShow(path=path, suffix=suffix)
         print(''.join(self.list))
 
 
