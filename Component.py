@@ -1,38 +1,38 @@
 
 class Component:
-    def __init__(self, name=None, parent=None):
+    def __init__(self, name=None, root=None):
         self.name = name
-        self.parent = parent
+        self.root = root
 
     def getName(self):
         return self.name
 
-    def getParent(self):
-        return self.parent
+    def getRoot(self):
+        return self.root
 
 
 class Title(Component):
-    def __init__(self, name, parent):
-        super().__init__(name=name, parent=parent)
+    def __init__(self, name, root):
+        super().__init__(name=name, root=root)
 
     def getName(self):
         return self.name
 
-    def getParent(self):
-        return self.parent
+    def getRoot(self):
+        return self.root
 
 
 class Bookmark(Component):
-    def __init__(self, name, url, parent):
-        super().__init__(name=name, parent=parent)
+    def __init__(self, name, url, root):
+        super().__init__(name=name, root=root)
         self.readNum = 0
         self.url = url
 
     def getName(self):
         return self.name
 
-    def getParent(self):
-        return self.parent
+    def getRoot(self):
+        return self.root
 
     def addReadNum(self):
         self.readNum += 1
@@ -42,7 +42,7 @@ class Singleton:
     __instance__ = None
 
     def __init__(self):
-        self.root = Title(name=None, parent=None)
+        self.root = Title(name=None, root=None)
         self.components = []
 
     def getRoot(self):
@@ -62,10 +62,10 @@ class Singleton:
         return [component for component in self.components if isinstance(component, Bookmark)]
 
     def getRoots(self):
-        return [component for component in self.components if component.getParent() is None]
+        return [component for component in self.components if component.getRoot() is None]
 
     def getChildren(self, parentName: str):
-        return [component for component in self.components if str(component.parent).__eq__(parentName)]
+        return [component for component in self.components if str(component.getRoot()).__eq__(parentName)]
 
     @staticmethod
     def getInstance():

@@ -1,6 +1,6 @@
 from Component import *
 
-import re, os
+import re
 from util import *
 
 
@@ -20,7 +20,7 @@ class OpenContext(Context):
 
     def openTitle(self, component: dict, parent: str = None):
         for name in component:
-            title = Title(name=name, parent=parent)
+            title = Title(name=name, root=parent)
             singleton = Singleton.getInstance()
             singleton.addComponent(title)
             self.visitAndOpen(component[name], parent=name)
@@ -32,7 +32,7 @@ class OpenContext(Context):
         for item in component:
             name = re.findall(r'\[.+?\]', item)[0].replace('[', '').replace(']', '')
             url = re.findall(r'\(.+?\)', item)[0].replace('[', '').replace(']', '')
-            bookmark = Bookmark(name=name, url=url, parent=parent)
+            bookmark = Bookmark(name=name, url=url, root=parent)
             singleton = Singleton.getInstance()
             singleton.addComponent(bookmark)
 
@@ -94,9 +94,8 @@ class ListContext(Context):  # 无法去除内部没有.bmk的文件夹
         pass
 
     def strategyMethod(self, **kwargs):
-        path = os.getcwd()
-        contentProvider = ContentProvider(root=AbstractFile(path=path))
-        treeView = TreeView(contentProvider=contentProvider)
+        path = os.getcwd().replace('\\', '/')
+        treeView = TreeView(contentProvider=FSContentProvider())
         treeView.show(path=path, suffix='.bmk')
 
 
@@ -121,12 +120,12 @@ class AddContext(Context):
     def strategyMethod(self, **kwargs):
         singleton = Singleton.getInstance()
         if 'title' in kwargs:
-            component = Title(name=kwargs['title'], parent=kwargs['parent'])
+            component = Title(name=kwargs['title'], root=kwargs['parent'])
             singleton.addComponent(component=component)
         elif 'bookmark' in kwargs:
             bookmark = kwargs['bookmark'].split('@')
             assert len(bookmark) == 2
-            component = Bookmark(name=bookmark[0], url=bookmark[1], parent=kwargs['parent'])
+            component = Bookmark(name=bookmark[0], url=bookmark[1], root=kwargs['parent'])
             singleton.addComponent(component=component)
 
 

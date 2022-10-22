@@ -29,10 +29,10 @@ class AbstractFile:
         self.root = root
 
     def getRoot(self) -> str:
-        pass
+        return self.root
 
     def getName(self) -> str:
-        pass
+        return self.name
 
     def getFullName(self) -> str:
         pass
@@ -50,14 +50,6 @@ class AbstractFile:
 class FileWithPath(AbstractFile):
     def __init__(self, name: str, root: str):
         super().__init__(name=name, root=root)
-        # self.name = name
-        # self.root = root
-
-    def getRoot(self) -> str:
-        return self.root
-
-    def getName(self) -> str:
-        return self.name
 
     def getFullName(self) -> str:
         return self.getRoot() + '/' + self.getName()
@@ -74,17 +66,26 @@ class FileWithPath(AbstractFile):
 
 class ContentProvider:
 
-    def getAllFiles(self, suffix: str, parent: FileWithPath) -> List[FileWithPath]:
+    def getAllFiles(self, parent, suffix) -> List[AbstractFile]:
+        pass
+
+    def getChildren(self, parent, suffix) -> List[AbstractFile]:
+        pass
+
+
+class FSContentProvider(ContentProvider):
+
+    def getAllFiles(self, parent: FileWithPath, suffix: str) -> List[FileWithPath]:
         return [FileWithPath(root=parent.getFullName(), name=name) for name in parent.getSiblings()
                 if name.endswith(suffix) or FileWithPath(root=parent.getFullName(), name=name).isDirectory()]
 
-    def getChildren(self, suffix: str, parent: FileWithPath) -> List[FileWithPath]:
-        return self.getAllFiles(suffix, parent) if parent.isDirectory() else []
+    def getChildren(self, parent: FileWithPath, suffix: str) -> List[FileWithPath]:
+        return self.getAllFiles(parent=parent, suffix=suffix) if parent.isDirectory() else []
 
 
 class TreeView(object):
-    def __init__(self):
-        self.contentProvider = ContentProvider()
+    def __init__(self, contentProvider: ContentProvider):
+        self.contentProvider = contentProvider
         self.space = ''
         self.list = []
 
@@ -118,6 +119,6 @@ class TreeView(object):
 
 if __name__ == '__main__':
     path = 'd:/pycharmProjects/ooad-lab1'  # 'D:/研究/论文'
-    d = TreeView()
+    d = TreeView(contentProvider=FSContentProvider())
     d.show(path=path, suffix='.py')
 
