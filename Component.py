@@ -24,7 +24,7 @@ def every(lst, fn=lambda x: x):
 
 class AbstractFile:
 
-    def __init__(self, name: str, root: str):
+    def __init__(self, name: str = None, root: str = None):
         self.name = name
         self.root = root
 
@@ -39,7 +39,7 @@ class AbstractFile:
 
 
 class FileWithPath(AbstractFile):
-    def __init__(self, name: str, root: str):
+    def __init__(self, name: str = None, root: str = None):
         super().__init__(name=name, root=root)
 
     def getFullName(self) -> str:
@@ -47,7 +47,7 @@ class FileWithPath(AbstractFile):
 
 
 class BookmarkTitle(AbstractFile):
-    def __init__(self, name: str, root: str, **kwargs):
+    def __init__(self, name: str = None, root: str = None, **kwargs):
         super().__init__(name=name, root=root)
         self.url = kwargs['url'] if 'url' in kwargs else None
         self.readNum = 0
@@ -117,6 +117,9 @@ class Singleton:
 
     def addComponent(self, component: BookmarkTitle):
         self.components.append(component)
+
+    def getAllComponents(self):
+        return self.components
 
     def deleteComponent(self, name):
         self.components = [component for component in self.components if component.name != name]

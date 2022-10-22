@@ -1,7 +1,7 @@
 from Component import *
 
 import re
-# from util import *
+from util import *
 
 
 class Context:
@@ -30,8 +30,7 @@ class OpenContext(Context):
             return
         component = component.split('\n')
         for item in component:
-            name = re.findall(r'\[.+?\]', item)[0].replace('[', '').replace(']', '')
-            url = re.findall(r'\(.+?\)', item)[0].replace('[', '').replace(']', '')
+            name, url = get_bmk_name_and_url(item)
             bookmark = BookmarkTitle(name=name, url=url, root=parent)
             singleton = Singleton.getInstance()
             singleton.addComponent(bookmark)
@@ -60,23 +59,17 @@ class ShowContext(TreeView):
         return super().visitDirectory(component, isLast)
 
     def strategyMethod(self):
-        singleton = Singleton.getInstance()
-        total = len(singleton.getChildren(None))
-        for num, component in enumerate(singleton.getChildren(None)):
-            self.list.append(self.visitDirectory(component, num == total-1))
-            self.visitAndShow(component=component, suffix='')
-            self.space = self.space[:-4]
+        dumpTitle = BookmarkTitle(name=None, root=None)
+        self.visitAndShow(component=dumpTitle, suffix='')
         print('\n'.join(self.list))
 
 
-class ListContext(TreeView):  # 无法去除内部没有.bmk的文件夹
+class ListContext(TreeView):
     def __init__(self, contentProvider: FSContentProvider):
         super().__init__(contentProvider)
 
     def strategyMethod(self):
-        path = os.getcwd().replace('\\', '/')
-        name = path.split('/')[-1]
-        root = '/'.join(path.split('/')[:-1])
+        name, root = get_cur_root_and_name()
         component = FileWithPath(root=root, name=name)
         self.visitAndShow(component=component, suffix='.bmk')
         print('\n'.join(self.list))
@@ -88,12 +81,11 @@ class ReadContext(Context):
         pass
 
     def strategyMethod(self, **kwargs):
-        pass
-        # bookmark = kwargs['bookmark']
-        # singleton = Singleton.getInstance()
-        # for component in singleton.getAllComponents():
-        #     if component.name == bookmark:
-        #         component.addReadNum()
+        bookmark = kwargs['bookmark']
+        singleton = Singleton.getInstance()
+        for component in singleton.getAllComponents():
+            if component.name == bookmark:
+                component.addReadNum()
 
 
 class AddContext(Context):
@@ -102,16 +94,15 @@ class AddContext(Context):
         pass
 
     def strategyMethod(self, **kwargs):
-        pass
-        # singleton = Singleton.getInstance()
-        # if 'title' in kwargs:
-        #     component = Title(name=kwargs['title'], root=kwargs['parent'])
-        #     singleton.addComponent(component=component)
-        # elif 'bookmark' in kwargs:
-        #     bookmark = kwargs['bookmark'].split('@')
-        #     assert len(bookmark) == 2
-        #     component = Bookmark(name=bookmark[0], url=bookmark[1], root=kwargs['parent'])
-        #     singleton.addComponent(component=component)
+        singleton = Singleton.getInstance()
+        if 'title' in kwargs:
+            component = BookmarkTitle(name=kwargs['title'], root=kwargs['parent'])
+            singleton.addComponent(component=component)
+        elif 'bookmark' in kwargs:
+            bookmark = kwargs['bookmark'].split('@')
+            assert len(bookmark) == 2
+            component = BookmarkTitle(name=bookmark[0], url=bookmark[1], root=kwargs['parent'])
+            singleton.addComponent(component=component)
 
 
 class DeleteContext(Context):
@@ -120,15 +111,13 @@ class DeleteContext(Context):
         pass
 
     def strategyMethod(self, **kwargs):
-        pass
-        # singleton = Singleton.getInstance()
-        # children = singleton.getChildren(parentName=kwargs['name'])
-        # for child in children:
-        #     self.strategyMethod(name=child.getName())
-        # self.visitAndDelete(name=kwargs['name'])
+        singleton = Singleton.getInstance()
+        children = singleton.getChildren(parentName=kwargs['name'])
+        for child in children:
+            self.strategyMethod(name=child.getName())
+        self.visitAndDelete(name=kwargs['name'])
 
     def visitAndDelete(self, name):
-        pass
-        # singleton = Singleton.getInstance()
-        # singleton.deleteComponent(name=name)
+        singleton = Singleton.getInstance()
+        singleton.deleteComponent(name=name)
 
