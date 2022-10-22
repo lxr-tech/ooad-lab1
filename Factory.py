@@ -11,7 +11,7 @@ class AbstractFactory:
 class OpenFactory(AbstractFactory):
 
     def newContext(self) -> OpenContext:
-        createStrategy = CreateTitle()
+        createStrategy = CreateTitleStrategy()
         return OpenContext(createStrategy=createStrategy)
 
 
@@ -38,7 +38,7 @@ class ReadFactory(AbstractFactory):
 class AddTitleFactory(AbstractFactory):
 
     def newContext(self) -> AddContext:
-        createTitle = CreateTitle()
+        createTitle = CreateTitleStrategy()
         return AddContext(createStrategy=createTitle)
 
 

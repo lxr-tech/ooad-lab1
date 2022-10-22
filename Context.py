@@ -11,7 +11,7 @@ class OpenContext(Creator):
 
     def openTitle(self, item: dict, parent: str = None):
         for name in item:
-            self.setStrategy(CreateTitle())
+            self.setStrategy(CreateTitleStrategy())
             self.createStrategy.create(item=name, parent=parent)
             self.create(item[name], parent=name)
 

@@ -42,7 +42,7 @@ class ReadCommand(AbstractCommand):
         readVisitor.strategyMethod(bookmark=bookmark)
 
     def cancel(self):
-        super().cancel()
+        pass  # need to be implemented in undo / redo
 
     def commit(self):
         super().cancel()

@@ -55,7 +55,7 @@ class CreateBookmarkListStrategy(CreateStrategy):
             self.createStrategy.create(item=singleItem, parent=parent)
 
 
-class CreateTitle(CreateStrategy):
+class CreateTitleStrategy(CreateStrategy):
 
     def create(self, item: str, parent: str):
         title = BookmarkTitle(name=item, root=parent)
