@@ -4,8 +4,8 @@ from Context import *
 
 class AbstractFactory:
 
-    def newContext(self) -> Context:
-        return Context()
+    def newContext(self):
+        pass
 
 
 class OpenFactory(AbstractFactory):
@@ -52,5 +52,6 @@ class AddBookmarkFactory(AbstractFactory):
 class DeleteFactory(AbstractFactory):
 
     def newContext(self) -> DeleteContext:
-        return DeleteContext()
+        deleteBookmark = DeleteBookmark()
+        return DeleteContext(deleteStrategy=deleteBookmark)
 

@@ -5,7 +5,7 @@ from Component import *
 
 class CreateStrategy:
 
-    def create(self, item, parent) -> BookmarkTitle:
+    def create(self, item, parent):
         pass
 
 
@@ -61,4 +61,37 @@ class CreateTitle(CreateStrategy):
         title = BookmarkTitle(name=item, root=parent)
         singleton = Singleton.getInstance()
         singleton.addComponent(title)
+
+
+class DeleteStrategy:
+
+    def delete(self, item):
+        pass
+
+
+class Deleter:
+
+    def __init__(self, deleteStrategy: DeleteStrategy):
+        self.deleteStrategy = deleteStrategy
+
+    def setStrategy(self, deleteStrategy: DeleteStrategy):
+        self.deleteStrategy = deleteStrategy
+
+    def delete(self, item):
+        self.deleteStrategy.delete(item)
+
+
+class DeleteBookmark(DeleteStrategy):
+
+    def delete(self, item: str):
+        singleton = Singleton.getInstance()
+        singleton.deleteComponent(name=item)
+
+
+class DeleteTitle(DeleteStrategy):
+
+    def delete(self, item: str):
+        singleton = Singleton.getInstance()
+        singleton.deleteComponent(name=item)
+
 

@@ -15,9 +15,12 @@ class AbstractCommand:
     def cancel(self):
         pass
 
+    def commit(self):
+        pass
 
-class OpenCommand(AbstractCommand):
-    def __init__(self, factory: OpenFactory):
+
+class TreeCommand(AbstractCommand):
+    def __init__(self, factory: AbstractFactory):
         super().__init__(factory)
 
     def execute(self):
@@ -27,28 +30,7 @@ class OpenCommand(AbstractCommand):
     def cancel(self):
         super().cancel()
 
-
-class ShowCommand(AbstractCommand):
-    def __init__(self, factory: ShowFactory):
-        super().__init__(factory=factory)
-
-    def execute(self):
-        showTitle = self.factory.newContext()
-        showTitle.strategyMethod()
-
-    def cancel(self):
-        super().cancel()
-
-
-class ListCommand(AbstractCommand):
-    def __init__(self, factory: ListFactory):
-        super().__init__(factory=factory)
-
-    def execute(self):
-        showTitle = self.factory.newContext()
-        showTitle.strategyMethod()
-
-    def cancel(self):
+    def commit(self):
         super().cancel()
 
 
@@ -64,9 +46,12 @@ class ReadCommand(AbstractCommand):
     def cancel(self):
         super().cancel()
 
+    def commit(self):
+        super().cancel()
 
-class AddTitleCommand(AbstractCommand):
-    def __init__(self, factory: AddTitleFactory):
+
+class AddCommand(AbstractCommand):
+    def __init__(self, factory: AbstractFactory):
         super().__init__(factory=factory)
 
     def execute(self):
@@ -75,20 +60,10 @@ class AddTitleCommand(AbstractCommand):
         addVisitor.strategyMethod(item=item, parent=parent)
 
     def cancel(self):
-        pass  # need to be implemented in undo/redo
+        pass  # need to be implemented in undo / redo
 
-
-class AddBookmarkCommand(AbstractCommand):
-    def __init__(self, factory: AddBookmarkFactory):
-        super().__init__(factory=factory)
-
-    def execute(self):
-        addVisitor = self.factory.newContext()
-        item, parent = sys.argv[2], None if len(sys.argv) < 4 else sys.argv[4]
-        addVisitor.strategyMethod(item=item, parent=parent)
-
-    def cancel(self):
-        pass  # need to be implemented in undo/redo
+    def commit(self):
+        pass  # need to be implemented in save
 
 
 class DeleteCommand(AbstractCommand):
@@ -100,7 +75,10 @@ class DeleteCommand(AbstractCommand):
         deleteVisitor.strategyMethod(name=sys.argv[2])
 
     def cancel(self):
-        pass  # need to be implemented in undo/redo
+        pass  # need to be implemented in undo / redo
+
+    def commit(self):
+        pass  # need to be implemented in save
 
 
 class Invoker:
@@ -110,17 +88,17 @@ class Invoker:
     def open(self):
         self.save()
         self.commandList = []
-        openCommand = OpenCommand(OpenFactory())
+        openCommand = TreeCommand(OpenFactory())
         openCommand.execute()
         print('open interface')
 
     def showTree(self):
-        showCommand = ShowCommand(ShowFactory())
+        showCommand = TreeCommand(ShowFactory())
         showCommand.execute()
         print('show interface')
 
     def listTree(self):
-        showCommand = ListCommand(ListFactory())
+        showCommand = TreeCommand(ListFactory())
         showCommand.execute()
         print('list interface')
 
@@ -131,32 +109,32 @@ class Invoker:
         print('read interface')
 
     def addTitle(self):
-        addCommand = AddTitleCommand(AddTitleFactory())
+        addCommand = AddCommand(AddTitleFactory())
         addCommand.execute()
         self.setCommand(addCommand)
         print('add title interface')
 
     def addBookmark(self):
-        addCommand = AddBookmarkCommand(AddBookmarkFactory())
+        addCommand = AddCommand(AddBookmarkFactory())
         addCommand.execute()
         self.setCommand(addCommand)
-        print('add title interface')
+        print('add bookmark interface')
 
     def deleteTitle(self):
-        deleteCommand = DeleteCommand(DeleteFactory)
+        deleteCommand = DeleteCommand(DeleteFactory())
         deleteCommand.execute()
         self.setCommand(deleteCommand)
         print('delete title interface')
 
     def deleteBookmark(self):
-        deleteCommand = DeleteCommand(DeleteFactory)
+        deleteCommand = DeleteCommand(DeleteFactory())
         deleteCommand.execute()
         self.setCommand(deleteCommand)
-        print('delete title interface')
+        print('delete bookmark interface')
 
     def save(self):
         # for command in self.commandList:
-        #     command.execute()
+        #     command.commit()
         print('save interface')
         pass
 

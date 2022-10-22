@@ -5,15 +5,6 @@ import re, sys
 from util import *
 
 
-class Context:
-    def __init__(self):
-        super().__init__()
-        pass
-
-    def strategyMethod(self, **kwargs):
-        pass
-
-
 class OpenContext(Creator):
     def __init__(self, createStrategy: CreateStrategy):
         super().__init__(createStrategy)
@@ -68,13 +59,12 @@ class ListContext(TreeView):
         print('\n'.join(self.list))
 
 
-class ReadContext(Context):
+class ReadContext():
     def __init__(self):
         super().__init__()
         pass
 
-    def strategyMethod(self, **kwargs):
-        bookmark = kwargs['bookmark']
+    def strategyMethod(self, bookmark):
         singleton = Singleton.getInstance()
         for component in singleton.getAllComponents():
             if component.name == bookmark:
@@ -89,19 +79,18 @@ class AddContext(Creator):
         self.createStrategy.create(item=item, parent=parent)
 
 
-class DeleteContext(Context):
-    def __init__(self):
-        super().__init__()
-        pass
+class DeleteContext(Deleter):
+    def __init__(self, deleteStrategy: DeleteStrategy):
+        super().__init__(deleteStrategy)
 
-    def strategyMethod(self, **kwargs):
+    def strategyMethod(self, name):
         singleton = Singleton.getInstance()
-        children = singleton.getChildren(parentName=kwargs['name'])
+        children = singleton.getChildren(parentName=name)
         for child in children:
             self.strategyMethod(name=child.getName())
-        self.visitAndDelete(name=kwargs['name'])
+        self.deleteStrategy.delete(item=name)
 
-    def visitAndDelete(self, name):
-        singleton = Singleton.getInstance()
-        singleton.deleteComponent(name=name)
+    def delete(self, item):
+        self.deleteStrategy.delete(item=item)
+
 

@@ -19,8 +19,8 @@ class Controller:
     @staticmethod
     def get_input():
         sys.argv = [sys.argv[0]]
-        args = input(">>> ").replace('\'', '').replace('\"', '').split()
-        return args
+        args = input(">>> ").split()
+        return [arg.replace('\'', '').replace('\"', '') for arg in args]
 
     @staticmethod
     def main():
