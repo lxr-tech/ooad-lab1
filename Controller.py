@@ -1,10 +1,10 @@
 import sys
 from Command import *
 
-func_dict = {'add-title': 'invoker.add',            # ok (almost, chinese character)
-             'add-bookmark': 'invoker.add',         # ok
-             'delete-title': 'invoker.delete',      # ok
-             'delete-bookmark': 'invoker.delete',   # ok
+func_dict = {'add-title': 'invoker.addTitle',            # ok (almost, chinese character)
+             'add-bookmark': 'invoker.addBookmark',         # ok
+             'delete-title': 'invoker.deleteTitle',      # ok
+             'delete-bookmark': 'invoker.deleteBookmark',   # ok
              'open': 'invoker.open',                # ok
              'save': 'invoker.save',                #
              'undo': 'invoker.undo',                #

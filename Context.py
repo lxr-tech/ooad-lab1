@@ -1,6 +1,7 @@
 from Component import *
+from Creator import *
 
-import re
+import re, sys
 from util import *
 
 
@@ -13,34 +14,26 @@ class Context:
         pass
 
 
-class OpenContext(Context):
-    def __init__(self):
-        super().__init__()
-        pass
+class OpenContext(Creator):
+    def __init__(self, createStrategy: CreateStrategy):
+        super().__init__(createStrategy)
 
     def openTitle(self, component: dict, parent: str = None):
         for name in component:
-            title = BookmarkTitle(name=name, root=parent)
-            singleton = Singleton.getInstance()
-            singleton.addComponent(title)
-            self.visitAndOpen(component[name], parent=name)
+            self.setStrategy(CreateTitle())
+            self.createStrategy.create(item=name, parent=parent)
+            self.create(component[name], parent=name)
 
     def openBookmark(self, component: str, parent: str = None):
-        if component in [' ', '']:
-            return
-        component = component.split('\n')
-        for item in component:
-            name, url = get_bmk_name_and_url(item)
-            bookmark = BookmarkTitle(name=name, url=url, root=parent)
-            singleton = Singleton.getInstance()
-            singleton.addComponent(bookmark)
+        self.setStrategy(CreateBookmarkList())
+        self.createStrategy.create(item=component, parent=parent)
 
-    def strategyMethod(self, **kwargs):
+    def strategyMethod(self):
         singleton = Singleton.getInstance()
         singleton.reset()
-        self.visitAndOpen(kwargs['raw_dict'], parent=None)
+        self.create(markdown_to_dict(sys.argv[2]), parent=None)
 
-    def visitAndOpen(self, component: [dict, str], parent: str = None):
+    def create(self, component: [dict, str], parent: str = None):
         if isinstance(component, str):
             self.openBookmark(component, parent=parent)
         else:
@@ -88,21 +81,12 @@ class ReadContext(Context):
                 component.addReadNum()
 
 
-class AddContext(Context):
-    def __init__(self):
-        super().__init__()
-        pass
+class AddContext(Creator):
+    def __init__(self, createStrategy: CreateStrategy):
+        super().__init__(createStrategy)
 
-    def strategyMethod(self, **kwargs):
-        singleton = Singleton.getInstance()
-        if 'title' in kwargs:
-            component = BookmarkTitle(name=kwargs['title'], root=kwargs['parent'])
-            singleton.addComponent(component=component)
-        elif 'bookmark' in kwargs:
-            bookmark = kwargs['bookmark'].split('@')
-            assert len(bookmark) == 2
-            component = BookmarkTitle(name=bookmark[0], url=bookmark[1], root=kwargs['parent'])
-            singleton.addComponent(component=component)
+    def strategyMethod(self, item, parent):
+        self.createStrategy.create(item=item, parent=parent)
 
 
 class DeleteContext(Context):

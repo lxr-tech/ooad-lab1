@@ -6,8 +6,8 @@ from util import *
 
 
 class AbstractCommand:
-    def __init__(self):
-        pass
+    def __init__(self, factory: AbstractFactory):
+        self.factory = factory
 
     def execute(self):
         pass
@@ -17,26 +17,23 @@ class AbstractCommand:
 
 
 class OpenCommand(AbstractCommand):
-    def __init__(self):
-        super().__init__()
-        self.openFactory = OpenFactory()
+    def __init__(self, factory: OpenFactory):
+        super().__init__(factory)
 
     def execute(self):
-        openTitle = self.openFactory.newContext()
-        component = markdown_to_dict(sys.argv[2])
-        openTitle.strategyMethod(raw_dict=component)
+        openTitle = self.factory.newContext()
+        openTitle.strategyMethod()
 
     def cancel(self):
         super().cancel()
 
 
 class ShowCommand(AbstractCommand):
-    def __init__(self):
-        super().__init__()
-        self.showFactory = ShowFactory()
+    def __init__(self, factory: ShowFactory):
+        super().__init__(factory=factory)
 
     def execute(self):
-        showTitle = self.showFactory.newContext()
+        showTitle = self.factory.newContext()
         showTitle.strategyMethod()
 
     def cancel(self):
@@ -44,12 +41,11 @@ class ShowCommand(AbstractCommand):
 
 
 class ListCommand(AbstractCommand):
-    def __init__(self):
-        super().__init__()
-        self.listFactory = ListFactory()
+    def __init__(self, factory: ListFactory):
+        super().__init__(factory=factory)
 
     def execute(self):
-        showTitle = self.listFactory.newContext()
+        showTitle = self.factory.newContext()
         showTitle.strategyMethod()
 
     def cancel(self):
@@ -57,12 +53,11 @@ class ListCommand(AbstractCommand):
 
 
 class ReadCommand(AbstractCommand):
-    def __init__(self):
-        super().__init__()
-        self.readFactory = ReadFactory()
+    def __init__(self, factory: ReadFactory):
+        super().__init__(factory=factory)
 
     def execute(self):
-        readVisitor = self.readFactory.newContext()
+        readVisitor = self.factory.newContext()
         bookmark = sys.argv[2]
         readVisitor.strategyMethod(bookmark=bookmark)
 
@@ -70,31 +65,38 @@ class ReadCommand(AbstractCommand):
         super().cancel()
 
 
-class AddCommand(AbstractCommand):
-    def __init__(self):
-        super().__init__()
-        self.addFactory = AddFactory()
+class AddTitleCommand(AbstractCommand):
+    def __init__(self, factory: AddTitleFactory):
+        super().__init__(factory=factory)
 
     def execute(self):
-        addVisitor = self.addFactory.newContext()
-        if sys.argv[1] == 'add-title':
-            addVisitor.strategyMethod(title=sys.argv[2],
-                                      parent=None if len(sys.argv) < 4 else sys.argv[4])
-        elif sys.argv[1] == 'add-bookmark':
-            addVisitor.strategyMethod(bookmark=sys.argv[2],
-                                      parent=None if len(sys.argv) < 4 else sys.argv[4])
+        addVisitor = self.factory.newContext()
+        item, parent = sys.argv[2], None if len(sys.argv) < 4 else sys.argv[4]
+        addVisitor.strategyMethod(item=item, parent=parent)
+
+    def cancel(self):
+        pass  # need to be implemented in undo/redo
+
+
+class AddBookmarkCommand(AbstractCommand):
+    def __init__(self, factory: AddBookmarkFactory):
+        super().__init__(factory=factory)
+
+    def execute(self):
+        addVisitor = self.factory.newContext()
+        item, parent = sys.argv[2], None if len(sys.argv) < 4 else sys.argv[4]
+        addVisitor.strategyMethod(item=item, parent=parent)
 
     def cancel(self):
         pass  # need to be implemented in undo/redo
 
 
 class DeleteCommand(AbstractCommand):
-    def __init__(self):
-        super().__init__()
-        self.deleteFactory = DeleteFactory()
+    def __init__(self, factory: DeleteFactory):
+        super().__init__(factory=factory)
 
     def execute(self):
-        deleteVisitor = self.deleteFactory.newContext()
+        deleteVisitor = self.factory.newContext()
         deleteVisitor.strategyMethod(name=sys.argv[2])
 
     def cancel(self):
@@ -108,34 +110,46 @@ class Invoker:
     def open(self):
         self.save()
         self.commandList = []
-        openCommand = OpenCommand()
+        openCommand = OpenCommand(OpenFactory())
         openCommand.execute()
         print('open interface')
 
     def showTree(self):
-        showCommand = ShowCommand()
+        showCommand = ShowCommand(ShowFactory())
         showCommand.execute()
         print('show interface')
 
     def listTree(self):
-        showCommand = ListCommand()
+        showCommand = ListCommand(ListFactory())
         showCommand.execute()
         print('list interface')
 
     def read(self):
-        readCommand = ReadCommand()
+        readCommand = ReadCommand(ReadFactory())
         readCommand.execute()
         self.setCommand(readCommand)
         print('read interface')
 
-    def add(self):
-        addCommand = AddCommand()
+    def addTitle(self):
+        addCommand = AddTitleCommand(AddTitleFactory())
         addCommand.execute()
         self.setCommand(addCommand)
         print('add title interface')
 
-    def delete(self):
-        deleteCommand = DeleteCommand()
+    def addBookmark(self):
+        addCommand = AddBookmarkCommand(AddBookmarkFactory())
+        addCommand.execute()
+        self.setCommand(addCommand)
+        print('add title interface')
+
+    def deleteTitle(self):
+        deleteCommand = DeleteCommand(DeleteFactory)
+        deleteCommand.execute()
+        self.setCommand(deleteCommand)
+        print('delete title interface')
+
+    def deleteBookmark(self):
+        deleteCommand = DeleteCommand(DeleteFactory)
         deleteCommand.execute()
         self.setCommand(deleteCommand)
         print('delete title interface')

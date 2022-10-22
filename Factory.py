@@ -1,27 +1,21 @@
+from Creator import *
 from Context import *
 
 
 class AbstractFactory:
-    def __init__(self):
-        pass
 
     def newContext(self) -> Context:
         return Context()
 
 
 class OpenFactory(AbstractFactory):
-    def __init__(self):
-        super().__init__()
-        pass
 
     def newContext(self) -> OpenContext:
-        return OpenContext()
+        createStrategy = CreateTitle()
+        return OpenContext(createStrategy=createStrategy)
 
 
 class ShowFactory(AbstractFactory):
-    def __init__(self):
-        super().__init__()
-        pass
 
     def newContext(self) -> ShowContext:
         bmkContentProvider = BmkContentProvider()
@@ -29,9 +23,6 @@ class ShowFactory(AbstractFactory):
 
 
 class ListFactory(AbstractFactory):
-    def __init__(self):
-        super().__init__()
-        pass
 
     def newContext(self) -> ListContext:
         fsContentProvider = FSContentProvider()
@@ -39,27 +30,26 @@ class ListFactory(AbstractFactory):
 
 
 class ReadFactory(AbstractFactory):
-    def __init__(self):
-        super().__init__()
-        pass
 
     def newContext(self) -> ReadContext:
         return ReadContext()
 
 
-class AddFactory(AbstractFactory):
-    def __init__(self):
-        super().__init__()
-        pass
+class AddTitleFactory(AbstractFactory):
 
     def newContext(self) -> AddContext:
-        return AddContext()
+        createTitle = CreateTitle()
+        return AddContext(createStrategy=createTitle)
+
+
+class AddBookmarkFactory(AbstractFactory):
+
+    def newContext(self) -> AddContext:
+        addBookmark = AddBookmark()
+        return AddContext(createStrategy=addBookmark)
 
 
 class DeleteFactory(AbstractFactory):
-    def __init__(self):
-        super().__init__()
-        pass
 
     def newContext(self) -> DeleteContext:
         return DeleteContext()

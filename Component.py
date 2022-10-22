@@ -1,25 +1,5 @@
 import os
-import json
 from typing import List
-
-from markdown_to_json.vendor import CommonMark
-from markdown_to_json.markdown_to_json import Renderer, CMarkASTNester
-
-
-def markdown_to_dict(markdown_file):
-    nester = CMarkASTNester()
-    renderer = Renderer()
-    f = open(markdown_file, 'r', encoding='UTF-8', errors='ignore')
-    ast = CommonMark.DocParser().parse(f.read())
-    f.close()
-    nested = nester.nest(ast)
-    rendered = renderer.stringify_dict(nested)
-    rendered = json.loads(json.dumps(rendered))
-    return rendered
-
-
-def every(lst, fn=lambda x: x):
-    return all(map(fn, lst))
 
 
 class AbstractFile:
