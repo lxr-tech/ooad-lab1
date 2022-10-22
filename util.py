@@ -1,10 +1,18 @@
-import re
 import os
+import sys
+import csv
 import json
 from typing import List
 
 from markdown_to_json.vendor import CommonMark
 from markdown_to_json.markdown_to_json import Renderer, CMarkASTNester
+
+
+def get_input():
+    sys.argv = [sys.argv[0]]
+    args = [line for line in csv.reader([input(">>> ").replace('\'', '\"')],
+                                        skipinitialspace=True, delimiter=' ')][0]
+    return [arg.replace('\'', '').replace('\"', '') for arg in args]
 
 
 def markdown_to_dict(markdown_file):

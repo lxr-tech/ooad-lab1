@@ -1,4 +1,5 @@
 import sys
+import util
 from Command import *
 
 func_dict = {'add-title': 'invoker.addTitle',               # ok (almost, chinese character)
@@ -17,22 +18,16 @@ func_dict = {'add-title': 'invoker.addTitle',               # ok (almost, chines
 class Controller:
 
     @staticmethod
-    def get_input():
-        sys.argv = [sys.argv[0]]
-        args = input(">>> ").split()
-        return [arg.replace('\'', '').replace('\"', '') for arg in args]
-
-    @staticmethod
     def main():
         invoker = Invoker()
-        args_ = Controller.get_input()
+        args_ = get_input()
         while len(args_) > 0 and not args_[0].__contains__('exit'):
             sys.argv.extend(args_)
             try:
                 eval(func_dict[sys.argv[1]])()
             except (NameError, KeyError):
                 print('this is an undefined command')
-            args_ = Controller.get_input()
+            args_ = get_input()
 
 
 if __name__ == '__main__':
