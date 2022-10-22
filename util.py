@@ -6,8 +6,6 @@ from typing import List
 from markdown_to_json.vendor import CommonMark
 from markdown_to_json.markdown_to_json import Renderer, CMarkASTNester
 
-# from Component import *
-
 
 def markdown_to_dict(markdown_file):
     nester = CMarkASTNester()
@@ -30,19 +28,4 @@ def get_cur_root_and_name():
     name = path.split('/')[-1]
     root = '/'.join(path.split('/')[:-1])
     return name, root
-
-
-def get_bmk_name_and_url(string: str):
-    name = re.findall(r'\[.+?\]', string)[0].replace('[', '').replace(']', '')
-    url = re.findall(r'\(.+?\)', string)[0].replace('[', '').replace(']', '')
-    return name, url
-
-
-# class Destroyer:
-#
-#     def __init__(self, createStrategy: CreateStrategy):
-#         self.createStrategy = createStrategy
-#
-#     def destroy(self, item):
-#         pass
 

@@ -1,8 +1,6 @@
 from Factory import *
 
 import sys
-import argparse
-from util import *
 
 
 class AbstractCommand:
@@ -67,12 +65,12 @@ class AddCommand(AbstractCommand):
 
 
 class DeleteCommand(AbstractCommand):
-    def __init__(self, factory: DeleteFactory):
+    def __init__(self, factory: AbstractFactory):
         super().__init__(factory=factory)
 
     def execute(self):
         deleteVisitor = self.factory.newContext()
-        deleteVisitor.strategyMethod(name=sys.argv[2])
+        deleteVisitor.strategyMethod(item=sys.argv[2])
 
     def cancel(self):
         pass  # need to be implemented in undo / redo
@@ -90,60 +88,49 @@ class Invoker:
         self.commandList = []
         openCommand = TreeCommand(OpenFactory())
         openCommand.execute()
-        print('open interface')
 
     def showTree(self):
         showCommand = TreeCommand(ShowFactory())
         showCommand.execute()
-        print('show interface')
 
     def listTree(self):
         showCommand = TreeCommand(ListFactory())
         showCommand.execute()
-        print('list interface')
 
     def read(self):
         readCommand = ReadCommand(ReadFactory())
         readCommand.execute()
         self.setCommand(readCommand)
-        print('read interface')
 
     def addTitle(self):
         addCommand = AddCommand(AddTitleFactory())
         addCommand.execute()
         self.setCommand(addCommand)
-        print('add title interface')
 
     def addBookmark(self):
         addCommand = AddCommand(AddBookmarkFactory())
         addCommand.execute()
         self.setCommand(addCommand)
-        print('add bookmark interface')
 
     def deleteTitle(self):
-        deleteCommand = DeleteCommand(DeleteFactory())
+        deleteCommand = DeleteCommand(DeleteTitleFactory())
         deleteCommand.execute()
         self.setCommand(deleteCommand)
-        print('delete title interface')
 
     def deleteBookmark(self):
-        deleteCommand = DeleteCommand(DeleteFactory())
+        deleteCommand = DeleteCommand(DeleteBookmarkFactory())
         deleteCommand.execute()
         self.setCommand(deleteCommand)
-        print('delete bookmark interface')
 
     def save(self):
         # for command in self.commandList:
         #     command.commit()
-        print('save interface')
         pass
 
     def undo(self):
-        print('undo interface')
         pass
 
     def redo(self):
-        print('redo interface')
         pass
 
     def setCommand(self, command: AbstractCommand):

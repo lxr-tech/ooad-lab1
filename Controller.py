@@ -1,17 +1,17 @@
 import sys
 from Command import *
 
-func_dict = {'add-title': 'invoker.addTitle',            # ok (almost, chinese character)
+func_dict = {'add-title': 'invoker.addTitle',               # ok (almost, chinese character)
              'add-bookmark': 'invoker.addBookmark',         # ok
-             'delete-title': 'invoker.deleteTitle',      # ok
+             'delete-title': 'invoker.deleteTitle',         # ok
              'delete-bookmark': 'invoker.deleteBookmark',   # ok
-             'open': 'invoker.open',                # ok
-             'save': 'invoker.save',                #
-             'undo': 'invoker.undo',                #
-             'redo': 'invoker.redo',                #
-             'show-tree': 'invoker.showTree',       # ok
-             'ls-tree': 'invoker.listTree',         # ok (nearly, folder)
-             'read-bookmark': 'invoker.read', }     # ok
+             'open': 'invoker.open',                        # ok
+             'save': 'invoker.save',                        #
+             'undo': 'invoker.undo',                        #
+             'redo': 'invoker.redo',                        #
+             'show-tree': 'invoker.showTree',               # ok
+             'ls-tree': 'invoker.listTree',                 # ok (nearly, folder problem)
+             'read-bookmark': 'invoker.read', }             # ok
 
 
 class Controller:

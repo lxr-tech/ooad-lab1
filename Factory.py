@@ -1,4 +1,4 @@
-from Creator import *
+
 from Context import *
 
 
@@ -45,13 +45,20 @@ class AddTitleFactory(AbstractFactory):
 class AddBookmarkFactory(AbstractFactory):
 
     def newContext(self) -> AddContext:
-        addBookmark = AddBookmark()
+        addBookmark = AddBookmarkStrategy()
         return AddContext(createStrategy=addBookmark)
 
 
-class DeleteFactory(AbstractFactory):
+class DeleteTitleFactory(AbstractFactory):
 
     def newContext(self) -> DeleteContext:
-        deleteBookmark = DeleteBookmark()
+        deleteBookmark = DeleteTitleStrategy()
+        return DeleteContext(deleteStrategy=deleteBookmark)
+
+
+class DeleteBookmarkFactory(AbstractFactory):
+
+    def newContext(self) -> DeleteContext:
+        deleteBookmark = DeleteBookmarkStrategy()
         return DeleteContext(deleteStrategy=deleteBookmark)
 

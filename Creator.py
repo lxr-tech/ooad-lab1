@@ -21,7 +21,7 @@ class Creator:
         self.createStrategy.create(item, parent)
 
 
-class AddBookmark(CreateStrategy):
+class AddBookmarkStrategy(CreateStrategy):
 
     def create(self, item: str, parent: str):
         itemList = item.split('@')
@@ -31,7 +31,7 @@ class AddBookmark(CreateStrategy):
         singleton.addComponent(bookmark)
 
 
-class CreateBookmark(CreateStrategy):
+class CreateBookmarkStrategy(CreateStrategy):
 
     def create(self, item: str, parent: str):
         name = re.findall(r'\[.+?\]', item)[0].replace('[', '').replace(']', '')
@@ -41,11 +41,11 @@ class CreateBookmark(CreateStrategy):
         singleton.addComponent(bookmark)
 
 
-class CreateBookmarkList(CreateStrategy):
+class CreateBookmarkListStrategy(CreateStrategy):
 
     def __init__(self):
         super().__init__()
-        self.createStrategy = CreateBookmark()
+        self.createStrategy = CreateBookmarkStrategy()
 
     def create(self, item: str, parent: str):
         if item in [' ', '']:
@@ -81,17 +81,22 @@ class Deleter:
         self.deleteStrategy.delete(item)
 
 
-class DeleteBookmark(DeleteStrategy):
+class DeleteBookmarkStrategy(DeleteStrategy):
 
     def delete(self, item: str):
         singleton = Singleton.getInstance()
         singleton.deleteComponent(name=item)
 
 
-class DeleteTitle(DeleteStrategy):
+class DeleteTitleStrategy(DeleteStrategy):
 
     def delete(self, item: str):
         singleton = Singleton.getInstance()
+        children = singleton.getChildren(parentName=item)
+        contentProvider = ContentProvider()
+        for child in children:
+            deleter = Deleter(DeleteBookmarkStrategy() if contentProvider.isDirectory(child) else DeleteTitleStrategy())
+            deleter.delete(item=child.getName())
         singleton.deleteComponent(name=item)
 
 

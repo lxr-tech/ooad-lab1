@@ -19,6 +19,7 @@ class AbstractFile:
 
 
 class FileWithPath(AbstractFile):
+
     def __init__(self, name: str = None, root: str = None):
         super().__init__(name=name, root=root)
 
@@ -27,6 +28,7 @@ class FileWithPath(AbstractFile):
 
 
 class BookmarkTitle(AbstractFile):
+
     def __init__(self, name: str = None, root: str = None, **kwargs):
         super().__init__(name=name, root=root)
         self.url = kwargs['url'] if 'url' in kwargs else None
@@ -95,11 +97,16 @@ class Singleton:
         del self.components
         self.components = []
 
+    def getAllComponents(self):
+        return self.components
+
     def addComponent(self, component: BookmarkTitle):
         self.components.append(component)
 
-    def getAllComponents(self):
-        return self.components
+    def readComponent(self, bookmark: str):
+        for component in self.getAllComponents():
+            if component.name == bookmark:
+                component.addReadNum()
 
     def deleteComponent(self, name):
         self.components = [component for component in self.components if component.name != name]
@@ -140,7 +147,7 @@ class BmkContentProvider(ContentProvider):
         return 'BookmarkTitle'
 
 
-class TreeView(object):
+class TreeViewer(object):
     def __init__(self, contentProvider: ContentProvider):
         self.contentProvider = contentProvider
         self.space = ''
