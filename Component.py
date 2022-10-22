@@ -2,7 +2,7 @@ import os
 from typing import List
 
 
-class AbstractFile:
+class Component:
 
     def __init__(self, name: str = None, root: str = None):
         self.name = name
@@ -18,7 +18,7 @@ class AbstractFile:
         pass
 
 
-class FileWithPath(AbstractFile):
+class FileWithPath(Component):
 
     def __init__(self, name: str = None, root: str = None):
         super().__init__(name=name, root=root)
@@ -27,7 +27,7 @@ class FileWithPath(AbstractFile):
         return self.getRoot() + '/' + self.getName()
 
 
-class BookmarkTitle(AbstractFile):
+class BookmarkTitle(Component):
 
     def __init__(self, name: str = None, root: str = None, **kwargs):
         super().__init__(name=name, root=root)
@@ -46,19 +46,19 @@ class BookmarkTitle(AbstractFile):
 
 class ContentProvider:
 
-    def isFile(self, abstractFile: AbstractFile) -> bool:
+    def isFile(self, component: Component) -> bool:
         pass
 
-    def isDirectory(self, abstractFile: AbstractFile) -> bool:
+    def isDirectory(self, component: Component) -> bool:
         pass
 
-    def getSiblings(self, abstractFile: AbstractFile) -> List:
+    def getSiblings(self, component: Component) -> List:
         pass
 
-    def getAllFiles(self, parent: AbstractFile, suffix: str) -> List[AbstractFile]:
+    def getAllFiles(self, root: Component, suffix: str) -> List[Component]:
         pass
 
-    def getChildren(self, parent: AbstractFile, suffix: str) -> List[AbstractFile]:
+    def getChildren(self, root: Component, suffix: str) -> List[Component]:
         pass
 
     def provideType(self) -> str:
@@ -67,21 +67,21 @@ class ContentProvider:
 
 class FSContentProvider(ContentProvider):
 
-    def isFile(self, abstractFile: FileWithPath) -> bool:
-        return os.path.isfile(abstractFile.getFullName())
+    def isFile(self, component: FileWithPath) -> bool:
+        return os.path.isfile(component.getFullName())
 
-    def isDirectory(self, abstractFile: FileWithPath) -> bool:
-        return os.path.isdir(abstractFile.getFullName())
+    def isDirectory(self, component: FileWithPath) -> bool:
+        return os.path.isdir(component.getFullName())
 
-    def getSiblings(self, abstractFile: FileWithPath) -> List:
-        return os.listdir(abstractFile.getFullName())
+    def getSiblings(self, component: FileWithPath) -> List:
+        return os.listdir(component.getFullName())
 
-    def getAllFiles(self, parent: FileWithPath, suffix: str) -> List[FileWithPath]:
-        return [FileWithPath(root=parent.getFullName(), name=name) for name in self.getSiblings(parent)
-                if name.endswith(suffix) or self.isDirectory(FileWithPath(root=parent.getFullName(), name=name))]
+    def getAllFiles(self, root: FileWithPath, suffix: str) -> List[FileWithPath]:
+        return [FileWithPath(root=root.getFullName(), name=name) for name in self.getSiblings(root)
+                if name.endswith(suffix) or self.isDirectory(FileWithPath(root=root.getFullName(), name=name))]
 
-    def getChildren(self, parent: FileWithPath, suffix: str) -> List[FileWithPath]:
-        return self.getAllFiles(parent=parent, suffix=suffix) if self.isDirectory(parent) else []
+    def getChildren(self, root: FileWithPath, suffix: str) -> List[FileWithPath]:
+        return self.getAllFiles(root=root, suffix=suffix) if self.isDirectory(root) else []
 
     def provideType(self) -> str:
         return 'FileWithPath'
@@ -103,9 +103,9 @@ class Singleton:
     def addComponent(self, component: BookmarkTitle):
         self.components.append(component)
 
-    def readComponent(self, bookmark: str):
+    def readComponent(self, bookmarkName: str):
         for component in self.getAllComponents():
-            if component.name == bookmark:
+            if component.name == bookmarkName:
                 component.addReadNum()
 
     def deleteComponent(self, name):
@@ -125,23 +125,23 @@ class Singleton:
 
 class BmkContentProvider(ContentProvider):
 
-    def isFile(self, abstractFile: BookmarkTitle) -> bool:
-        return abstractFile.url is not None
+    def isFile(self, component: BookmarkTitle) -> bool:
+        return component.url is not None
 
-    def isDirectory(self, abstractFile: BookmarkTitle) -> bool:
-        return abstractFile.url is None
+    def isDirectory(self, component: BookmarkTitle) -> bool:
+        return component.url is None
 
-    def getSiblings(self, abstractFile: BookmarkTitle) -> List:
+    def getSiblings(self, component: BookmarkTitle) -> List:
         singleton = Singleton.getInstance()
-        return singleton.getChildren(parentName=abstractFile.getRoot())
+        return singleton.getChildren(parentName=component.getRoot())
 
-    def getAllFiles(self, parent: BookmarkTitle, suffix: str) -> List[BookmarkTitle]:
-        return [component for component in self.getSiblings(parent)
+    def getAllFiles(self, root: BookmarkTitle, suffix: str) -> List[BookmarkTitle]:
+        return [component for component in self.getSiblings(root)
                 if component.getName().endswith(suffix) or self.isDirectory(component)]
 
-    def getChildren(self, parent: BookmarkTitle, suffix: str) -> List[BookmarkTitle]:
+    def getChildren(self, root: BookmarkTitle, suffix: str) -> List[BookmarkTitle]:
         singleton = Singleton.getInstance()
-        return singleton.getChildren(parentName=parent.getName())
+        return singleton.getChildren(parentName=root.getName())
 
     def provideType(self) -> str:
         return 'BookmarkTitle'
@@ -153,17 +153,17 @@ class TreeViewer(object):
         self.space = ''
         self.list = []
 
-    def visitFile(self, leaf, isLast):
+    def visitFile(self, file: Component, isLast):
         prefix = str(self.space) + '└── ' if isLast else str(self.space) + '├── '
-        return prefix + leaf.getName()
+        return prefix + file.getName()
 
-    def visitDirectory(self, component, isLast):
+    def visitDirectory(self, directory: Component, isLast):
         prefix = str(self.space) + '└── ' if isLast else str(self.space) + '├── '
         self.space = str(self.space) + '    ' if isLast else str(self.space) + '│   '
-        return prefix + component.getName()
+        return prefix + directory.getName()
 
-    def visitAndShow(self, component: AbstractFile, suffix: str):
-        files = self.contentProvider.getChildren(parent=component, suffix=suffix)
+    def visitAndShow(self, component: Component, suffix: str):
+        files = self.contentProvider.getChildren(root=component, suffix=suffix)
         total = len(files)
         for num, file in enumerate(files):
             if self.contentProvider.isFile(file):

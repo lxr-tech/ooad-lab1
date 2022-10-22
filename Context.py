@@ -1,4 +1,4 @@
-from Creator import *
+from Strategy import *
 
 import sys
 from util import *
@@ -9,25 +9,25 @@ class OpenContext(Creator):
     def __init__(self, createStrategy: CreateStrategy):
         super().__init__(createStrategy)
 
-    def openTitle(self, component: dict, parent: str = None):
-        for name in component:
+    def openTitle(self, item: dict, parent: str = None):
+        for name in item:
             self.setStrategy(CreateTitle())
             self.createStrategy.create(item=name, parent=parent)
-            self.create(component[name], parent=name)
+            self.create(item[name], parent=name)
 
-    def openBookmark(self, component: str, parent: str = None):
+    def openBookmark(self, item: str, parent: str = None):
         self.setStrategy(CreateBookmarkListStrategy())
-        self.createStrategy.create(item=component, parent=parent)
+        self.createStrategy.create(item=item, parent=parent)
 
     def strategyMethod(self):
         Singleton.getInstance().reset()
         self.create(markdown_to_dict(sys.argv[2]), parent=None)
 
-    def create(self, component: [dict, str], parent: str = None):
-        if isinstance(component, str):
-            self.openBookmark(component, parent=parent)
+    def create(self, item: [dict, str], parent: str = None):
+        if isinstance(item, str):
+            self.openBookmark(item, parent=parent)
         else:
-            self.openTitle(component, parent=parent)
+            self.openTitle(item, parent=parent)
 
 
 class ShowContext(TreeViewer):
@@ -35,12 +35,12 @@ class ShowContext(TreeViewer):
     def __init__(self, contentProvider: BmkContentProvider):
         super().__init__(contentProvider)
 
-    def visitFile(self, leaf: BookmarkTitle, isLast: bool):
-        suffix = '' if leaf.getReadNum() == 0 else '*'
-        return super().visitFile(leaf, isLast) + suffix
+    def visitFile(self, file: BookmarkTitle, isLast: bool):
+        suffix = '' if file.getReadNum() == 0 else '*'
+        return super().visitFile(file, isLast) + suffix
 
-    def visitDirectory(self, component: BookmarkTitle, isLast: bool):
-        return super().visitDirectory(component, isLast)
+    def visitDirectory(self, directory: BookmarkTitle, isLast: bool):
+        return super().visitDirectory(directory, isLast)
 
     def strategyMethod(self):
         dumpTitle = BookmarkTitle(name=None, root=None)
@@ -63,7 +63,7 @@ class ListContext(TreeViewer):
 class ReadContext:
 
     def strategyMethod(self, bookmark):
-        Singleton.getInstance().readComponent(bookmark=bookmark)
+        Singleton.getInstance().readComponent(bookmarkName=bookmark)
 
 
 class AddContext(Creator):

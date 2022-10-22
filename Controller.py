@@ -26,7 +26,7 @@ class Controller:
     def main():
         invoker = Invoker()
         args_ = Controller.get_input()
-        while not args_[0].__contains__('exit'):
+        while len(args_) > 0 and not args_[0].__contains__('exit'):
             sys.argv.extend(args_)
             try:
                 eval(func_dict[sys.argv[1]])()
