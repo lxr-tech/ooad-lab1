@@ -37,8 +37,7 @@ class ShowCommand(AbstractCommand):
 
     def execute(self):
         showTitle = self.showFactory.newContext()
-        showList = showTitle.strategyMethod()
-        print(''.join(showList), end='')
+        showTitle.strategyMethod()
 
     def cancel(self):
         super().cancel()
@@ -77,13 +76,14 @@ class AddCommand(AbstractCommand):
         self.addFactory = AddFactory()
 
     def execute(self):
-        addVisitor = self.addFactory.newContext()
-        if sys.argv[1] == 'add-title':
-            addVisitor.strategyMethod(title=sys.argv[2],
-                                      parent=None if len(sys.argv) < 4 else sys.argv[4])
-        elif sys.argv[1] == 'add-bookmark':
-            addVisitor.strategyMethod(bookmark=sys.argv[2],
-                                      parent=None if len(sys.argv) < 4 else sys.argv[4])
+        pass
+        # addVisitor = self.addFactory.newContext()
+        # if sys.argv[1] == 'add-title':
+        #     addVisitor.strategyMethod(title=sys.argv[2],
+        #                               parent=None if len(sys.argv) < 4 else sys.argv[4])
+        # elif sys.argv[1] == 'add-bookmark':
+        #     addVisitor.strategyMethod(bookmark=sys.argv[2],
+        #                               parent=None if len(sys.argv) < 4 else sys.argv[4])
 
     def cancel(self):
         pass  # need to be implemented in undo/redo

@@ -24,7 +24,8 @@ class ShowFactory(AbstractFactory):
         pass
 
     def newContext(self) -> ShowContext:
-        return ShowContext()
+        bmkContentProvider = BmkContentProvider()
+        return ShowContext(contentProvider=bmkContentProvider)
 
 
 class ListFactory(AbstractFactory):
@@ -33,7 +34,8 @@ class ListFactory(AbstractFactory):
         pass
 
     def newContext(self) -> ListContext:
-        return ListContext()
+        fsContentProvider = FSContentProvider()
+        return ListContext(contentProvider=fsContentProvider)
 
 
 class ReadFactory(AbstractFactory):
