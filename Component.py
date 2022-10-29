@@ -37,6 +37,10 @@ class BookmarkTitle(Component):
     def getFullName(self) -> str:
         return self.name
 
+    # 新加的
+    def getUrl(self) -> str:
+        return self.url
+
     def getReadNum(self):
         return self.readNum
 
@@ -111,12 +115,13 @@ class Singleton:
     def deleteComponent(self, name):
         self.components = [component for component in self.components if component.name != name]
 
-    def getChildren(self, parentName: str):
+    def getChildren(self, parentName):
         return [component for component in self.components if component.getRoot() == parentName]
 
     @staticmethod
     def getInstance():
         if Singleton.__instance__ is None:
+            # root?
             Singleton.__instance__ = Singleton()
             return Singleton.__instance__
         else:

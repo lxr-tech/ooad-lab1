@@ -32,3 +32,9 @@ class Controller:
 
 if __name__ == '__main__':
     Controller.main()
+    '''
+        open test.bmk
+        add-title A
+        show-tree
+        save
+    '''

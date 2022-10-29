@@ -3,9 +3,14 @@ from Factory import *
 import sys
 
 
+
+
 class AbstractCommand:
-    def __init__(self, factory: AbstractFactory):
-        self.factory = factory
+    def __init__(self, execFactory: AbstractFactory, cnclFactory: AbstractFactory):
+        # execFactory用于执行命令
+        # cnclFactory用于undo命令
+        self.execFactory = execFactory
+        self.cnclFactory = cnclFactory
 
     def execute(self):
         pass
@@ -13,16 +18,17 @@ class AbstractCommand:
     def cancel(self):
         pass
 
+    # 没有用上
     def commit(self):
         pass
 
 
 class TreeCommand(AbstractCommand):
-    def __init__(self, factory: AbstractFactory):
-        super().__init__(factory)
+    def __init__(self, execFactory: AbstractFactory, cnclFactory=None):
+        super().__init__(execFactory, cnclFactory)
 
     def execute(self):
-        openTitle = self.factory.newContext()
+        openTitle = self.execFactory.newContext()
         openTitle.strategyMethod()
 
     def cancel(self):
@@ -33,47 +39,52 @@ class TreeCommand(AbstractCommand):
 
 
 class ReadCommand(AbstractCommand):
-    def __init__(self, factory: ReadFactory):
-        super().__init__(factory=factory)
+    def __init__(self, execFactory: AbstractFactory, cnclFactory=None):
+        super().__init__(execFactory, cnclFactory)
 
     def execute(self):
-        readVisitor = self.factory.newContext()
+        readVisitor = self.execFactory.newContext()
         bookmark = sys.argv[2]
         readVisitor.strategyMethod(bookmark=bookmark)
 
     def cancel(self):
-        pass  # need to be implemented in undo / redo
+        super().cancel()
 
     def commit(self):
         super().cancel()
 
 
 class AddCommand(AbstractCommand):
-    def __init__(self, factory: AbstractFactory):
-        super().__init__(factory=factory)
+    def __init__(self, execFactory: AbstractFactory, cnclFactory=None):
+        super().__init__(execFactory, cnclFactory)
+        # 如果没有指定父节点，则父节点为伪root节点
+        self.item, self.parent = sys.argv[2], None if len(sys.argv) < 4 else sys.argv[4]
 
     def execute(self):
-        addVisitor = self.factory.newContext()
-        item, parent = sys.argv[2], None if len(sys.argv) < 4 else sys.argv[4]
-        addVisitor.strategyMethod(item=item, parent=parent)
+        addVisitor = self.execFactory.newContext()
+        addVisitor.strategyMethod(item=self.item, parent=self.parent)
 
     def cancel(self):
-        pass  # need to be implemented in undo / redo
+        deleteVisitor = self.cnclFactory.newContext()
+        deleteVisitor.strategyMethod(item=self.item)
 
     def commit(self):
         pass  # need to be implemented in save
 
 
 class DeleteCommand(AbstractCommand):
-    def __init__(self, factory: AbstractFactory):
-        super().__init__(factory=factory)
+    def __init__(self, execFactory: AbstractFactory, cnclFactory=None):
+        super().__init__(execFactory, cnclFactory)
+        self.item, self.parent = sys.argv[2], None if len(sys.argv) < 4 else sys.argv[4]
 
     def execute(self):
-        deleteVisitor = self.factory.newContext()
-        deleteVisitor.strategyMethod(item=sys.argv[2])
+        deleteVisitor = self.execFactory.newContext()
+        deleteVisitor.strategyMethod(item=self.item)
 
     def cancel(self):
-        pass  # need to be implemented in undo / redo
+        # 如果delete掉了一个根目录，需要将原来的内容全部弄回去
+        addVisitor = self.cnclFactory.newContext()
+        addVisitor.strategyMethod(item=self.item, parent=self.parent)
 
     def commit(self):
         pass  # need to be implemented in save
@@ -81,11 +92,13 @@ class DeleteCommand(AbstractCommand):
 
 class Invoker:
     def __init__(self):
-        self.commandList = []
+        self.commandList = []    # undoList
+        self.redoList = []
 
     def open(self):
-        self.save()
+        # self.save()
         self.commandList = []
+        self.redoList = []
         openCommand = TreeCommand(OpenFactory())
         openCommand.execute()
 
@@ -100,39 +113,65 @@ class Invoker:
     def read(self):
         readCommand = ReadCommand(ReadFactory())
         readCommand.execute()
-        self.setCommand(readCommand)
 
     def addTitle(self):
-        addCommand = AddCommand(AddTitleFactory())
+        addCommand = AddCommand(AddTitleFactory(), DeleteTitleFactory())
         addCommand.execute()
-        self.setCommand(addCommand)
+        self.setUndoCommand(addCommand)
 
     def addBookmark(self):
-        addCommand = AddCommand(AddBookmarkFactory())
+        addCommand = AddCommand(AddBookmarkFactory(), DeleteBookmarkFactory())
         addCommand.execute()
-        self.setCommand(addCommand)
+        self.setUndoCommand(addCommand)
 
     def deleteTitle(self):
-        deleteCommand = DeleteCommand(DeleteTitleFactory())
+        deleteCommand = DeleteCommand(DeleteTitleFactory(), AddTitleFactory())
         deleteCommand.execute()
-        self.setCommand(deleteCommand)
+        self.setUndoCommand(deleteCommand)
 
     def deleteBookmark(self):
-        deleteCommand = DeleteCommand(DeleteBookmarkFactory())
+        deleteCommand = DeleteCommand(DeleteBookmarkFactory(), AddBookmarkFactory())
         deleteCommand.execute()
-        self.setCommand(deleteCommand)
+        self.setUndoCommand(deleteCommand)
 
     def save(self):
-        # for command in self.commandList:
-        #     command.commit()
-        pass
+        # 获取数据库实例
+        singleton = Singleton.getInstance()
+        # 如果parentName=None，则是一级节点
+        root_items = singleton.getChildren(parentName=None)
+        # 获取一级节点的名字
+        root_names = [root_item.getFullName() for root_item in root_items]
+        # 通过dfs将书签树结构转为dict
+        root_dict = [dfs_node(root_item, OrderedDict(), singleton) for root_item in root_items]
+        # 哨兵节点
+        fake_root = OrderedDict(zip(root_names, root_dict))
+        # 通过dfs将dict转为markdown
+        markdown_str = ''
+        markdown_str = dfs_format(fake_root, 1, markdown_str)
+        with open('save.bmk', 'w+') as f:
+            f.write(markdown_str)
+
 
     def undo(self):
-        pass
+        # 如果commandList不为空
+        if self.commandList:
+            command = self.commandList.pop()
+            command.cancel()
+            # 将undo的命令添加至redoList
+            self.redoList.append(command)
+        else:
+            print("no command for undo")
 
     def redo(self):
-        pass
+        if self.redoList:
+            command = self.redoList.pop()
+            command.execute()
+            self.setUndoCommand(command)
+        else:
+            print("you should undo first to redo")
 
-    def setCommand(self, command: AbstractCommand):
+
+    def setUndoCommand(self, command: AbstractCommand):
         self.commandList.append(command)
-
+        if self.redoList:
+            self.redoList.clear()
