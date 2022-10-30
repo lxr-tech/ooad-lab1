@@ -148,7 +148,7 @@ class Invoker:
         # 通过dfs将dict转为markdown
         markdown_str = ''
         markdown_str = dfs_format(fake_root, 1, markdown_str)
-        with open('save.bmk', 'w+') as f:
+        with open('save.bmk', 'w+', encoding='utf-8') as f:
             f.write(markdown_str)
 
 
