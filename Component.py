@@ -37,7 +37,6 @@ class BookmarkTitle(Component):
     def getFullName(self) -> str:
         return self.name
 
-    # 新加的
     def getUrl(self) -> str:
         return self.url
 
@@ -112,16 +111,15 @@ class Singleton:
             if component.name == bookmarkName:
                 component.addReadNum()
 
-    def deleteComponent(self, name):
+    def deleteComponent(self, name: str):
         self.components = [component for component in self.components if component.name != name]
 
-    def getChildren(self, parentName):
+    def getChildren(self, parentName: str):
         return [component for component in self.components if component.getRoot() == parentName]
 
     @staticmethod
     def getInstance():
         if Singleton.__instance__ is None:
-            # root?
             Singleton.__instance__ = Singleton()
             return Singleton.__instance__
         else:
@@ -158,11 +156,11 @@ class TreeViewer(object):
         self.space = ''
         self.list = []
 
-    def visitFile(self, file: Component, isLast):
+    def visitFile(self, file: Component, isLast: bool):
         prefix = str(self.space) + '└── ' if isLast else str(self.space) + '├── '
         return prefix + file.getName()
 
-    def visitDirectory(self, directory: Component, isLast):
+    def visitDirectory(self, directory: Component, isLast: bool):
         prefix = str(self.space) + '└── ' if isLast else str(self.space) + '├── '
         self.space = str(self.space) + '    ' if isLast else str(self.space) + '│   '
         return prefix + directory.getName()
@@ -177,3 +175,27 @@ class TreeViewer(object):
                 self.list.append(self.visitDirectory(file, num == total - 1))
                 self.visitAndShow(component=file, suffix=suffix)
                 self.space = self.space[:-4]
+
+
+class TreeSaver(object):
+    def __init__(self, contentProvider: BmkContentProvider):
+        self.contentProvider = contentProvider
+        self.space = ' '
+        self.list = []
+
+    def visitFile(self, file: BookmarkTitle):
+        return '[%s](%s)' % (file.getName(), file.getUrl())
+
+    def visitDirectory(self, directory: BookmarkTitle):
+        self.space = '#' + self.space
+        return self.space + directory.getName()
+
+    def visitAndShow(self, component: BookmarkTitle, suffix: str):
+        files = self.contentProvider.getChildren(root=component, suffix=suffix)
+        for num, file in enumerate(files):
+            if self.contentProvider.isFile(file):
+                self.list.append(self.visitFile(file))
+            elif self.contentProvider.isDirectory(file):
+                self.list.append(self.visitDirectory(file))
+                self.visitAndShow(component=file, suffix=suffix)
+                self.space = self.space[1:]

@@ -48,6 +48,18 @@ class ShowContext(TreeViewer):
         print('\n'.join(self.list))
 
 
+class SaveContext(TreeSaver):
+
+    def __init__(self, contentProvider: BmkContentProvider):
+        super().__init__(contentProvider)
+
+    def strategyMethod(self):
+        dumpTitle = BookmarkTitle(name=None, root=None)
+        self.visitAndShow(component=dumpTitle, suffix='')
+        with open('save.bmk', 'w+', encoding='utf-8') as f:
+            f.write('\n'.join(self.list))
+
+
 class ListContext(TreeViewer):
 
     def __init__(self, contentProvider: FSContentProvider):

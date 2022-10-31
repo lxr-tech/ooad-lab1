@@ -22,6 +22,13 @@ class ShowFactory(AbstractFactory):
         return ShowContext(contentProvider=bmkContentProvider)
 
 
+class SaveFactory(AbstractFactory):
+
+    def newContext(self) -> SaveContext:
+        bmkContentProvider = BmkContentProvider()
+        return SaveContext(contentProvider=bmkContentProvider)
+
+
 class ListFactory(AbstractFactory):
 
     def newContext(self) -> ListContext:

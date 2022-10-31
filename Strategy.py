@@ -35,7 +35,7 @@ class CreateBookmarkStrategy(CreateStrategy):
 
     def create(self, item: str, parent: str):
         name = re.findall(r'\[.+?\]', item)[0].replace('[', '').replace(']', '')
-        url = re.findall(r'\(.+?\)', item)[0].replace('[', '').replace(']', '')
+        url = re.findall(r'\(.+?\)', item)[0].replace('(', '').replace(')', '')
         bookmark = BookmarkTitle(name=name, url=url, root=parent)
         singleton = Singleton.getInstance()
         singleton.addComponent(bookmark)
