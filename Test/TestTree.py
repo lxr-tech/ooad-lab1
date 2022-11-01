@@ -14,12 +14,10 @@ showTreeValid = '└── 个⼈收藏\n' \
                 '    │   └── ⾯向对象\n' \
                 '    └── 待阅读\n' \
                 '        └── Category Theory\n'
-listTreeValid = '├── .idea\n' \
-                '│   └── inspectionProfiles\n' \
+listTreeValid = '├── test.bmk\n' \
+                '├── save.bmk\n' \
                 '├── Test\n' \
                 '│   └── __pycache__\n' \
-                '├── test.bmk\n' \
-                '├── waste\n' \
                 '└── __pycache__\n'
 
 
@@ -39,19 +37,19 @@ class TestShowTree(TestOpen):
     def tearDown(self) -> None:
         update_sys_argv(['exit'])
 
-#
-# class TestListTree(TestOpen):
-#
-#     def setUp(self) -> None:
-#         super().setUp()
-#
-#     def testListTree(self):
-#
-#         sys.stdout = io.StringIO()
-#         update_sys_argv(['ls-tree'])
-#         self.invoker.listTree()
-#         content = str(sys.stdout.getvalue())
-#         self.assertEqual(listTreeValid, content)
-#
-#     def tearDown(self) -> None:
-#         update_sys_argv(['exit'])
+
+class TestListTree(TestOpen):
+
+    def setUp(self) -> None:
+        super().setUp()
+
+    def testListTree(self):
+
+        sys.stdout = io.StringIO()
+        update_sys_argv(['ls-tree'])
+        self.invoker.listTree()
+        content = str(sys.stdout.getvalue())
+        self.assertEqual(listTreeValid, content)
+
+    def tearDown(self) -> None:
+        update_sys_argv(['exit'])
