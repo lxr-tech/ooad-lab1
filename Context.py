@@ -1,6 +1,5 @@
 from Strategy import *
 
-import sys
 from util import *
 
 
@@ -32,8 +31,8 @@ class OpenContext(Creator):
 
 class ShowContext(TreeViewer):
 
-    def __init__(self, contentProvider: BmkContentProvider):
-        super().__init__(contentProvider)
+    def __init__(self, contentProvider: BmkContentProvider, lineProvider: PrintLineProvider):
+        super().__init__(contentProvider, lineProvider)
 
     def visitFile(self, file: BookmarkTitle, isLast: bool):
         suffix = '' if file.getReadNum() == 0 else '*'
@@ -48,10 +47,10 @@ class ShowContext(TreeViewer):
         print('\n'.join(self.list))
 
 
-class SaveContext(TreeSaver):
+class SaveContext(TreeViewer):
 
-    def __init__(self, contentProvider: BmkContentProvider):
-        super().__init__(contentProvider)
+    def __init__(self, contentProvider: BmkContentProvider, lineProvider: WriteLineProvider):
+        super().__init__(contentProvider, lineProvider)
 
     def strategyMethod(self):
         dumpTitle = BookmarkTitle(name=None, root=None)
@@ -62,8 +61,8 @@ class SaveContext(TreeSaver):
 
 class ListContext(TreeViewer):
 
-    def __init__(self, contentProvider: FSContentProvider):
-        super().__init__(contentProvider)
+    def __init__(self, contentProvider: FSContentProvider, lineProvider: PrintLineProvider):
+        super().__init__(contentProvider, lineProvider)
 
     def strategyMethod(self):
         name, root = get_cur_root_and_name()

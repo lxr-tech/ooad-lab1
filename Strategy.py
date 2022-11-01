@@ -1,6 +1,7 @@
 import re
 
 from Component import *
+from Viewer import *
 
 
 class CreateStrategy:
